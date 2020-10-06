@@ -46,8 +46,27 @@ export default {
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
     '@nuxtjs/toast',
-    'nuxt-material-design-icons'
+    'nuxt-material-design-icons',
+    'vuetify-dialog/nuxt',
   ],
+  vuetifyDialog: {
+    property: '$dialog',
+    confirm: {
+      type: 'red',
+      actions: {
+        false: {
+          color: 'red',
+          text: 'No',
+        },
+        true: {
+          color: 'red',
+          text: 'Sí',
+        },
+        // icon: false, // to disable icon just put false
+        // width: 500
+      },
+    },
+  },
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {

@@ -100,20 +100,7 @@ export default {
       required: (value) => !!value || "Este campo es requerido.",
     },
     title: "Nueva Tarea",
-    items: [
-      {
-        color: "#1F7087",
-        src: "https://cdn.vuetifyjs.com/images/cards/foster.jpg",
-        title: "Supermodel",
-        artist: "Foster the People",
-      },
-      {
-        color: "#952175",
-        src: "https://cdn.vuetifyjs.com/images/cards/halcyon.png",
-        title: "Halcyon Days",
-        artist: "Ellie Goulding",
-      },
-    ],
+    items: [],
   }),
   mounted() {
     this.getTareas();
@@ -130,9 +117,18 @@ export default {
         .get("/tarea")
         .then((res) => {
           _this.items = res.data;
+          if (_this.items.length == 0) {
+            this.$toast.info("Agreger nuevas tareas verlas en la lista.", {
+              position: "top-center",
+              duration: 3000,
+            });
+          }
         })
-        .catch((err) => {
-          _this.$toast.error("Error al obtener tareas");
+        .catch((e) => {
+          this.$toast.error("Error al obtener tareas.", {
+            position: "top-center",
+            duration: 3000,
+          });
         });
     },
     save() {
@@ -142,10 +138,7 @@ export default {
         if (this.id == null) {
           promise = this.$axios.post("/tarea", this.editedItem);
         } else {
-          promise = this.$axios.put(
-            `tarea/${this.id}`,
-            this.editedItem
-          );
+          promise = this.$axios.put(`tarea/${this.id}`, this.editedItem);
         }
         return promise
           .then((res) => {
@@ -156,34 +149,43 @@ export default {
             _this.dialog = false;
             _this.getTareas();
           })
-          .catch((err) => {
-            this.$toast.error({
-              text: "Error al grabar tarea: " + err.response.data.error,
-              type: "error",
+          .catch((e) => {
+            this.$toast.error("Error al grabar tarea.", {
+              position: "top-center",
+              duration: 3000,
             });
           });
       }
     },
     borrar(item) {
       let _this = this;
-      this.$axios
-        .delete("/tarea/" + item._id)
-        .then((res) => {
-          _this.$toast.success("Tarea eliminada", {
-            position: "top-center",
-            duration: 2000,
-          });
-          _this.getTareas();
+
+      this.$dialog
+        .confirm({
+          text: `¿Está seguro de querer eliminar la tarea"${item.titulo}"?`,
+          title: "Eliminar Item",
         })
-        .catch((err) => {
-          this.$toast.error({
-            text: "Error al eliminar: ",
-            type: "error",
-          });
+        .then((res) => {
+          if (res) {
+            this.$axios
+              .delete("/tarea/" + item._id)
+              .then((res) => {
+                _this.$toast.success("Tarea eliminada", {
+                  position: "top-center",
+                  duration: 2000,
+                });
+                _this.getTareas();
+              })
+              .catch((e) => {
+                this.$toast.error("Error al eliminar tarea.", {
+                  position: "top-center",
+                  duration: 3000,
+                });
+              });
+          }
         });
     },
     editar(item) {
-      debugger
       this.title = "Editar Tarea";
       this.id = item._id;
       this.editedItem.titulo = item.titulo;
